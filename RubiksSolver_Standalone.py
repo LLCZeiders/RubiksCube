@@ -142,7 +142,7 @@ def main():
         k = cv2.waitKey(1)
         if k & 0xff == ord('q'):
             break
-        if k & 0xff == ord(' '):
+        if k & 0xff == ord(' '):  # press space to take still image of side
             side.append(frame)
             print("pic taken")
     if notation:
