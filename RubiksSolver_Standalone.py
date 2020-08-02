@@ -1,3 +1,9 @@
+'''
+Solves rubik's cube by having user take picture of each face of the cube.
+The program then takes each side and determines the colors and order, and returns relative position of each square.
+
+Produces relative notation string and passes it through kociemba module/alogrithm to retrieve the solution to the Rubik's cube.
+'''
 import cv2
 import kociemba
 import numpy as np
@@ -8,11 +14,12 @@ def get_colors(pic):
     colors = {
         "red": ([168, 255, 62], [179, 255, 130]),
         "yellow": ([19, 39, 143], [67, 141, 255]),
-        "orange": ([0, 136, 111], [13, 236, 178]),
+        "orange": ([0, 136, 111], [13, 236, 178]),  # ranges will need to be adjusted depending on lighting in the room
         "white": ([113, 33, 206], [118, 68, 227]),
         "green": ([69, 81, 27], [91, 156, 233]),
         "blue": ([105, 245, 105], [120, 255, 255])
     }
+    
     color_list = {
         'yellow': [],
         'red': [],
@@ -22,8 +29,9 @@ def get_colors(pic):
         'orange': [],
     }
 
+    # cycles through color ranges, finding every matching color and its coordinates within the picture
     hsvsquare = cv2.cvtColor(pic, cv2.COLOR_BGR2HSV)
-    for color, (lower, upper) in colors.items():  # cycles through color ranges
+    for color, (lower, upper) in colors.items():  
         mask = cv2.inRange(hsvsquare, np.array(lower, dtype=np.uint8), np.array(upper, dtype=np.uint8))
         cnts, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         for c in cnts:
@@ -37,7 +45,7 @@ def get_colors(pic):
 
 
 def order_colors(c_list):
-    # orders the colors from get_color function left-to-right, top-to-bottom
+    # orders the colors from get_color function from left-to-right, and top-to-bottom
     color_names = []
     for _ in range(3):
         coords = []
@@ -53,11 +61,10 @@ def order_colors(c_list):
         def sort_by_x(e):
             return e[1]
 
-        # below sorts by y coordinate, then getting the lowest 3 (the top 3 squares).
-        # then sorts those 3 by x coordinate to determine left to right order
+        # Sorts by y coordinate, then getting the lowest 3 (the top 3 squares).
         coords.sort(key=sort_by_y)
         coords = coords[:3]
-        coords.sort(key=sort_by_x)
+        coords.sort(key=sort_by_x)  # then sorts those 3 by x coordinate to determine left to right order
 
         # deletes 3 (now ordered) squares and reruns the code, now missing the top 3
         # so it automatically sorts from top to bottom
@@ -67,11 +74,20 @@ def order_colors(c_list):
 
     if len(color_names) == 9:
         return color_names
-    return False  # retakes image if colors not collected properly
+    return False  # retakes image if colors not collected properly !!!This does not work properly and just prints "False" for some reason
 
 
 def get_orientation(color_list):
-    # U R F D L B
+    ''' 
+    returns relative notation
+    U R F D L B
+    U - up
+    R - right
+    F - front
+    D - down
+    L - left
+    B - back
+    '''
     directions = {
         'U': '',
         'R': '',
@@ -114,7 +130,7 @@ def main():
                 color_list.append(ordered)
                 side = []
             else:
-                print('take pic again')
+                print('take pic again')  #this does not work properly
                 side = []
                 continue
 
@@ -128,7 +144,6 @@ def main():
             break
         if k & 0xff == ord(' '):
             side.append(frame)
-            cv2.imwrite('Z:/Movies_shows/Python_Resources/squares/cube2.jpg', frame)
             print("pic taken")
     if notation:
         print(f"Answer: {kociemba.solve(notation)}")
